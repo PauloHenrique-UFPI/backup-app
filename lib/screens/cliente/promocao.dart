@@ -33,7 +33,7 @@ class PromocaoPageState extends State<PromocaoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return  AnimatedBuilder(
+    return AnimatedBuilder(
       animation: controller,
       builder: (_, __) {
         if (controller.loading) {
@@ -46,16 +46,9 @@ class PromocaoPageState extends State<PromocaoPage> {
             padding: const EdgeInsets.all(20),
             child: _Body(pizzas: controller.pizza),
           ),
-          floatingActionButton: FloatingActionButton(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            onPressed: () => { Navigator.pushNamed(context, "/addPizza") },
-            child: const Icon(Icons.add),
-          ),
         );
       },
     );
-
   }
 }
 
@@ -65,70 +58,95 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: pizzas.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () => {
-            // Navigator.pushNamed(context, NoticiaCompletaViewRoute,
-            //     arguments: noticias[index]),
-          },
-          child: Card(
-            elevation: 5.0,
-            margin: const EdgeInsets.all(8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  // Conteúdo à esquerda
-                  Expanded(
-                    child: Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(5.0),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(10.0), 
+                    
+                  ),
+                  child: const Text(
+                    "Pizzas Na Promoção",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: ListView.builder(
+            itemCount: pizzas.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () => {
+                  // Navigator.pushNamed(context, NoticiaCompletaViewRoute,
+                  //     arguments: noticias[index]),
+                },
+                child: Card(
+                  elevation: 5.0,
+                  margin: const EdgeInsets.all(8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        // Título
-                        Text(
-                          pizzas[index].sabor,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                            color: Color.fromARGB(255, 146, 107, 49),
+                        // Conteúdo à esquerda
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              // Título
+                              Text(
+                                pizzas[index].sabor,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Color.fromARGB(255, 146, 107, 49),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                pizzas[index].ingredientes,
+                                textAlign: TextAlign.left,
+                              ),
+                              const SizedBox(height: 5),
+                              const Divider(color: Colors.black),
+                              Text(
+                                'Preço: R\$ ${pizzas[index].precos.g}',
+                              ),
+                              const SizedBox(height: 5),
+                              // Text(
+                              //   'R\$ ${pizzas[index].preco.toStringAsFixed(2)}',
+                              // ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 5),
-                        Text(
-                          pizzas[index].ingredientes,
-                          textAlign: TextAlign.left,
+                        SizedBox(width: 10),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image(
+                            image: NetworkImage(pizzas[index].img),
+                            fit: BoxFit.cover,
+                            width: 100,
+                            height: 100,
+                          ),
                         ),
-                        
-                        const SizedBox(height: 5),
-                        const Divider(color: Colors.black),
-                         Text(
-                          'Preço: R\$ ${pizzas[index].precos.g}',
-                        ),
-                        const SizedBox(height: 5), 
-                        // Text(
-                        //   'R\$ ${pizzas[index].preco.toStringAsFixed(2)}',
-                        // ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 10), 
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image(
-                      image: NetworkImage(pizzas[index].img),
-                      fit: BoxFit.cover,
-                      width: 100,
-                      height: 100,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }

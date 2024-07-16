@@ -4,7 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:veneza/components/appBar_Atendente.dart';
+import 'package:veneza/components/appBar_Cliente.dart';
 import 'package:veneza/components/drawer_Atendente.dart';
+import 'package:veneza/components/drawer_Cliente.dart';
 import 'package:veneza/components/texto_bf_campo.dart';
 import 'package:veneza/components/texto_campo.dart';
 import 'package:veneza/components/titulo_borda.dart';
@@ -15,9 +17,9 @@ import 'package:get_it/get_it.dart';
 import 'package:veneza/repositories/pedido_repository.dart';
 
 
-class PedidoExpandidoPage extends StatefulWidget {
+class PedidoExpandidoClientePage extends StatefulWidget {
   final Pedido pedido;
-  const PedidoExpandidoPage({super.key, required this.pedido});
+  const PedidoExpandidoClientePage({super.key, required this.pedido});
 
   @override
   State<StatefulWidget> createState() {
@@ -25,7 +27,7 @@ class PedidoExpandidoPage extends StatefulWidget {
   }
 }
 
-class PedidoPageState extends State<PedidoExpandidoPage> {
+class PedidoPageState extends State<PedidoExpandidoClientePage> {
 
   @override
   void initState() {
@@ -37,8 +39,8 @@ class PedidoPageState extends State<PedidoExpandidoPage> {
   Widget build(BuildContext context) {
     double horizontalPadding = MediaQuery.of(context).size.width * 0.04;
     return Scaffold(
-    appBar: AppBarAtendente(),
-    drawer: DrawerAtendente(),
+    appBar: AppBarCliente(),
+    drawer: DrawerCliente(),
     body: SingleChildScrollView(
       child: Column(
         children: [

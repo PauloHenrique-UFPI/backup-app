@@ -38,8 +38,33 @@ class PizzaPageState extends State<PizzaPage> {
           return const Center(child: CircularProgressIndicator());
         }
         return Scaffold(
-          appBar: AppBarAtendente(),
-          drawer: DrawerAtendente(),
+          appBar:AppBar(
+              elevation: 1,
+              backgroundColor: Colors.orange,
+              title: controller.searching 
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: TextFormField(
+                        style: const TextStyle(color: Colors.black),
+                        autofocus: true,
+                        onChanged: controller.changeSearch,
+                        decoration: const InputDecoration(labelText: 'Sabor: '),
+                      ),
+                    )
+                  : const Center(
+                      child: Text('Lista de Pizzas'), 
+                    ), 
+              actions: [
+                IconButton(
+                  color: Colors.black,
+                  onPressed: controller.changeSearching,
+                  icon: controller.searching
+                      ? const Icon(Icons.close)
+                      : const Icon(Icons.search_sharp),
+                ),
+              ],
+            ),
+            drawer: DrawerAtendente(),
           body: Container(
             padding: const EdgeInsets.all(20),
             child: _Body(pizzas: controller.pizza),

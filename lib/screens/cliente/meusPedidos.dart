@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:veneza/components/appBar_Atendente.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:veneza/components/appBar_Cliente.dart';
-import 'package:veneza/components/drawer_Atendente.dart';
 import 'package:veneza/components/drawer_Cliente.dart';
 import 'package:veneza/controllers/controllers_pedido.dart';
 import 'package:veneza/models/pedidos.dart';
@@ -27,10 +25,22 @@ class MeusPedidosPageState extends State<MeusPedidosPage > {
     ),
   );
 
+  String id='0';
+
+
+
   @override
   void initState() {
-    controller.buscarItens();
+    iniciaID();
     super.initState();
+  }
+
+  Future<void> iniciaID() async {
+    SharedPreferences _sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      id = _sharedPreferences.getString('id_cliente') ?? '';
+      controller.buscarPorId(id);
+    });
   }
 
   @override
@@ -67,7 +77,7 @@ class _Body extends StatelessWidget {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () => {
-            Navigator.pushNamed(context, '/pedidoEx',
+            Navigator.pushNamed(context, '/pedidoExCliente',
                 arguments: pedido[index]),
           },
           child: Card(

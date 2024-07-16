@@ -6,12 +6,10 @@ class AppBarAtendente extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       actions: [
         IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {},
-        ),
-        IconButton(
           icon: const Icon(Icons.receipt_long),
-          onPressed: () {},
+          onPressed: () {
+              Navigator.pushNamed(context, '/pedido');
+            },
         ),
       ],
       backgroundColor: Colors.orange,

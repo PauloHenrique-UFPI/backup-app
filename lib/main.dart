@@ -14,7 +14,9 @@ import 'package:veneza/screens/auth/recuperacao.dart';
 import 'package:veneza/screens/auth/sign.dart';
 import 'package:veneza/screens/cliente/homeCliente.dart';
 import 'package:veneza/screens/cliente/meusPedidos.dart';
+import 'package:veneza/screens/cliente/pedido_extendido.dart';
 import 'package:veneza/screens/cliente/promocao.dart';
+import 'package:veneza/screens/cliente/realizarPedido.dart';
 import 'package:veneza/screens/home/home.dart';
 import 'package:veneza/screens/atendente/adm/pizza.dart';
 
@@ -48,12 +50,20 @@ class MyApp extends StatelessWidget {
         "/promocao": (context) => const PromocaoPage(),
         "/addPizza":(context) => const AddPizza(),
         "/addBebida":(context) => const AddBebida(),
+        "/realizarPedido":(context) => const FazerPedidoPage(),
         "/pedidoEx": (context) {
           final arg = ModalRoute.of(context)?.settings.arguments;
           return PedidoExpandidoPage(
             pedido: arg as Pedido,
           );
-  },
+         },
+         "/pedidoExCliente": (context) {
+          final arg = ModalRoute.of(context)?.settings.arguments;
+          return PedidoExpandidoClientePage(
+            pedido: arg as Pedido,
+          );
+         },
+         
       },
      
     );

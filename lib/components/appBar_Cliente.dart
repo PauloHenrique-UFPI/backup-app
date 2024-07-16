@@ -6,10 +6,6 @@ class AppBarCliente extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       actions: [
         IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {},
-        ),
-        IconButton(
           icon: const Icon(Icons.shopping_cart),
           onPressed: () {
               Navigator.pushNamed(context, '/meusPedidos');

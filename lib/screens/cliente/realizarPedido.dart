@@ -1,20 +1,23 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'package:flutter/cupertino.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:veneza/components/appBar_Atendente.dart';
-import 'package:veneza/components/drawer_Atendente.dart';
-import 'package:veneza/controllers/controllers_pedido.dart';
-import 'package:veneza/models/pedidos.dart';
-import 'package:veneza/models/rest_client.dart';
 import 'package:get_it/get_it.dart';
-import 'package:veneza/repositories/pedido_repository.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:veneza/blocs/validations_mixin.dart';
+import 'package:veneza/components/appBar_Cliente.dart';
+import 'package:veneza/components/drawer_Cliente.dart';
+import 'package:veneza/components/texto_bf_campo.dart';
+import 'package:veneza/components/texto_campo.dart';
+import 'package:veneza/components/titulo_borda.dart';
+import 'package:veneza/controllers/controllers_bebida.dart';
+import 'package:veneza/controllers/controllers_pizza.dart';
+import 'package:veneza/models/bebidas.dart';
+import 'package:veneza/models/pizzas.dart';
+import 'package:veneza/models/rest_client.dart';
+import 'package:veneza/repositories/bebida_repository.dart';
+import 'package:veneza/repositories/pizza_repository.dart';
 
 class FazerPedidoPage extends StatefulWidget {
-  final Pedido pedido;
-  const FazerPedidoPage({super.key, required this.pedido});
+  const FazerPedidoPage({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -22,296 +25,470 @@ class FazerPedidoPage extends StatefulWidget {
   }
 }
 
-class PedidoPageState extends State<FazerPedidoPage> {
+class PedidoPageState extends State<FazerPedidoPage> with ValidationsMixin {
+  final controllerPizza = ControllerPizzas(
+    pizzaRepository: PizzaRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+
+  final controllerBebida = ControllerBebidas(
+    bebidaRepository: BebidaRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+  String emailCliente = '';
+  String enderecoCliente = '';
+  String cepCliente = '';
+  String idCliente = '';
+  String? selectedValue;
+  final valor = TextEditingController();
+  final observacao = TextEditingController();
+  List<Pizza> pizzas = [];
+  List<Bebida> bebidas = [];
+  Map<String, bool> options = {};
+  Map<String, bool> optionsBebida = {};
+
+  String? _selectedOption;
+
+  List<String> _options = [
+    'dinheiro',
+    'cartao de credito',
+    'cartao de debito',
+    'pix',
+  ];
 
   @override
   void initState() {
     super.initState();
+    carregaDados();
   }
+
+  Future<void> carregaDados() async {
+    await controllerPizza.buscarPizza();
+    await controllerBebida.buscarBebida();
+    await iniciaCliente();
+    setState(() {
+      pizzas = controllerPizza.pizza;
+      bebidas = controllerBebida.bebida;
+      options = {for (var pizza in pizzas) pizza.sabor: false};
+      optionsBebida = {for (var bebida in bebidas) bebida.nome: false};
+    });
+  }
+
+  Future<void> iniciaCliente() async {
+    SharedPreferences _sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      emailCliente = _sharedPreferences.getString('email_cliente') ?? '';
+      enderecoCliente = _sharedPreferences.getString('endereco_cliente') ?? '';
+      cepCliente = _sharedPreferences.getString('cep_cliente') ?? '';
+      idCliente = _sharedPreferences.getString('id_cliente') ?? '';
+    });
+  }
+
+  Future<void> add(
+  String descricao, 
+  String? tamanho, 
+  String? formaPagamento, 
+  String valor, 
+  List<String> pizzasSelecionadas, 
+  List<String> bebidasSelecionadas
+    ) async {
+      SharedPreferences _sharedPreferences = await SharedPreferences.getInstance();
+      String? token = _sharedPreferences.getString('token');
+
+      try {
+        if (descricao.isEmpty) {
+          descricao = "";
+        }
+
+        List<int> pizzasIds = pizzasSelecionadas.map((id) => int.parse(id)).toList();
+        List<int> bebidasIds = bebidasSelecionadas.map((id) => int.parse(id)).toList();
+        print("Pizzas: $pizzasIds");
+        print("Bebidas: $bebidasIds");
+
+        // Criação do corpo do pedido com as pizzas e bebidas
+        Map<String, dynamic> body = {
+          "status": "pendente",
+          "idUsuario": int.parse(idCliente),
+          "local": "entrega",
+          "descricao": descricao,
+          "formaPagamento": formaPagamento,
+          "valor": double.parse(valor),
+          "pizzas": [
+            {
+              "pizzaIds": pizzasIds,
+              "tamanho": tamanho,
+            }
+          ],
+          "bebidas": bebidasIds
+        };
+
+        // Enviar a requisição para a API
+        Dio dio = Dio();
+        Response response = await dio.post(
+          'https://api-veneza.onrender.com/criar-pedido', // Substitua pela URL da sua API
+          data: body,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $token',
+            },
+          ),
+        );
+
+        if (response.statusCode == 200) {
+          // Sucesso
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Sucesso!'),
+                content: Text('Pedido realizado com sucesso!'),
+                actions: [
+                  TextButton(
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/homeCliente');
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          // Algo deu errado
+          throw Exception('Falha ao realizar o pedido');
+        }
+      } catch (error) {
+        // ignore: use_build_context_synchronously
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Ops!'),
+              content:  Text(error.toString()),
+              actions: [
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
 
   @override
   Widget build(BuildContext context) {
+    double precoAtual = calcularPrecoAtual(); // Calcula o preço atual do pedido dinamicamente
+
     return Scaffold(
-        appBar: AppBarAtendente(),
-        drawer: DrawerAtendente(),
-          body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  left: 12, right: 12, top: 10, bottom: 12),
-              child: Column(
-                children: [
-                  Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10.0), 
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 15, 15, 15), // Define a cor da borda como azul
-                      width: 2.0, // Define a largura da borda
-                    ),
-                  ),
-                  child: const Text(
-                    "Informações do cliente",
-                    textAlign: TextAlign.justify,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
+      appBar: AppBarCliente(),
+      drawer: DrawerCliente(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12, right: 12, top: 10, bottom: 12),
+          child: Column(
+            children: [
               const SizedBox(height: 10),
-              Padding(
-                 padding: const EdgeInsets.only(
-                  left: 15, right: 0, top: 0, bottom: 0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                       const Text(
-                          "Status do Pedido:  ",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          widget.pedido.status,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                       const Text(
-                          "Email:  ",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          widget.pedido.cliente.email,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                       const Text(
-                          "Endereço:  ",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          widget.pedido.cliente.endereco,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                   
-                  
-                ), 
-              ),
-              const SizedBox(height: 15),
-              Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10.0), 
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 15, 15, 15), // Define a cor da borda como azul
-                      width: 2.0, // Define a largura da borda
-                    ),
+              TituloTexto(label: "Informações do Cliente"),
+              const SizedBox(height: 10),
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      TextoBf(label: "E-mail: "),
+                      TextoCampo(label: emailCliente),
+                    ],
                   ),
-                  child: const Text(
-                    "Informações do Pagamento",
-                    textAlign: TextAlign.justify,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                  Row(
+                    children: [
+                      TextoBf(label: "Endereço: "),
+                      TextoCampo(label: enderecoCliente),
+                    ],
                   ),
-                ), 
-
-                const SizedBox(height: 10),
-                Padding(
-                 padding: const EdgeInsets.only(
-                  left: 15, right: 0, top: 0, bottom: 0),
-                child: Column(
-                  children: [
-                    const Row(
-                      children: [
-                       Text(
-                          "Método de pagamento:  ",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "Dinheiro",
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                       const Text(
-                          "Preço:  ",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          'R\$ ${widget.pedido.precoTotal.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                          ),
-                        ),
-
-                        const SizedBox(width: 40),
-                        const Text(
-                          "Local:  ",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          '${widget.pedido.local}',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ), 
-              ),
-
-              const SizedBox(height: 15),
-              Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10.0), 
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 15, 15, 15), // Define a cor da borda como azul
-                      width: 2.0, // Define a largura da borda
-                    ),
+                  Row(
+                    children: [
+                      TextoBf(label: "CEP: "),
+                      TextoCampo(label: cepCliente),
+                    ],
                   ),
-                  child: const Text(
-                    "Tamanhos  𝓔  Sabores",
-                    textAlign: TextAlign.justify,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                for (var produto in widget.pedido.produtos)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 0.5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Tamanho: ${produto.tamanho}, Preço: R\$ ${produto.precoTotal.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        SizedBox(height: 4), // Espaçamento entre o título e os sabores
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            for (var sabor in produto.sabores)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2.0),
-                                child: Text(
-                                  '${sabor.sabor}, ${sabor.categoria}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
                 ],
               ),
-            ),
+              const SizedBox(height: 10),
+              TituloTexto(label: "Forma de Pagamento"),
+              const SizedBox(height: 10),
+              DropdownButton<String>(
+                value: _selectedOption,
+                onChanged: (String? value) {
+                  setState(() {
+                    _selectedOption = value;
+                  });
+                },
+                items: _options.map((String option) {
+                  return DropdownMenuItem<String>(
+                    value: option,
+                    child: Text(option),
+                  );
+                }).toList(),
+                hint: Text('Selecione uma opção'), // Texto exibido quando nenhum item está selecionado
+              ),
 
-            const SizedBox(height: 15),
+              
+              if (_selectedOption == 'dinheiro')
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Text('Troco para quanto ?'),
+                  const SizedBox(height: 5),
+                  SizedBox(
+                      width: 200, // Define a largura desejada
+                      child: TextFormField(
+                        maxLines: null,
+                        controller: valor,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Troco *",
+                        ),
+                        validator: (value) => validacaoCompleta(
+                        [
+                          () => isNotEmpty(value),
+                        ],
+                      ),
+                      ),
+                      ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              TituloTexto(label: "Observações"),
+              const SizedBox(height: 15),
+              TextFormField(
+                      maxLines: null,
+                      controller: observacao,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '(ex: Retirar as cebolas)',
+                      ),
+                    ),
+
+              const SizedBox(height: 10),
+              TituloTexto(label: "Tamanho"),
+              const SizedBox(height: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  RadioOption(
+                    title: 'Pequena (4 pedaços)',
+                    value: 'P',
+                    groupValue: selectedValue,
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                  ),
+                  RadioOption(
+                    title: 'Média (6 pedaços)',
+                    value: 'M',
+                    groupValue: selectedValue,
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                  ),
+                  RadioOption(
+                    title: 'Grande (8 pedaços)',
+                    value: 'G',
+                    groupValue: selectedValue,
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                  ),
+                  RadioOption(
+                    title: 'Extra Grande (10 pedaços)',
+                    value: 'GG',
+                    groupValue: selectedValue,
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+
+              TituloTexto(label: "Selecione o Sabor"),
+              TextoCampo(label: "(até 4 sabores)"),
               Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10.0), 
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 15, 15, 15), // Define a cor da borda como azul
-                      width: 2.0, // Define a largura da borda
-                    ),
-                  ),
-                  child: const Text(
-                    "Observações",
-                    textAlign: TextAlign.justify,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                constraints: const BoxConstraints(
+                  maxHeight: 200.0, 
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: options.keys.map((String key) {
+                      return Transform.scale(
+                        scale: 0.9, // Reduz o tamanho do CheckboxListTile
+                        child: CheckboxListTile(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 0), // Remove padding horizontal
+                          title: Text(key),
+                          value: options[key],
+                          onChanged: (bool? value) {
+                            setState(() {
+                              options[key] = value!;
+                              // Atualiza o preço ao selecionar/deselecionar uma pizza
+                              precoAtual = calcularPrecoAtual();
+                            });
+                          },
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
-                const SizedBox(height: 15),
-                Text(
-                  widget.pedido.descricao,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
+              ),
+
+              const SizedBox(height: 10),
+              TituloTexto(label: "Bebidas"),
+              const SizedBox(height: 10),
+              Container(
+                constraints: const BoxConstraints(
+                  maxHeight: 200.0,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: optionsBebida.keys.map((String key) {
+                      return Transform.scale(
+                        scale: 0.9, // Reduz o tamanho do CheckboxListTile
+                        child: CheckboxListTile(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 0), // Remove padding horizontal
+                          title: Text(key),
+                          value: optionsBebida[key],
+                          onChanged: (bool? value) {
+                            setState(() {
+                              optionsBebida[key] = value!;
+                              // Atualiza o preço ao selecionar/deselecionar uma bebida
+                              precoAtual = calcularPrecoAtual();
+                            });
+                          },
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
-          ],
+              ),
+
+            const SizedBox(height: 20),
+
+            ],
+          ),
         ),
       ),
-      
-        );
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          List<String> pizzasSelecionadas = [];
+          List<String> bebidasSelecionadas = [];
+
+          pizzas.forEach((pizza) {
+            if (options[pizza.sabor] == true) {
+              pizzasSelecionadas.add(pizza.id.toString());
+            }
+          });
+
+          bebidas.forEach((bebida) {
+            if (optionsBebida[bebida.nome] == true) {
+              bebidasSelecionadas.add(bebida.id.toString());
+            }
+          });
+
+          add(observacao.text, selectedValue, _selectedOption, valor.text, pizzasSelecionadas, bebidasSelecionadas);
+        },
+        label: Text('Realizar Pedido - R\$ ${precoAtual.toStringAsFixed(2)}'),
+        backgroundColor: Colors.green.withOpacity(0.5), // Define a cor verde com 50% de transparência
+      ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  double calcularPrecoAtual() {
+    double precoTotal = 0.0;
+    int saboresSelecionados = 0;
+    
+    // Calcula a quantidade de sabores selecionados
+    for (var pizza in pizzas) {
+      if (options[pizza.sabor] == true) {
+        saboresSelecionados++;
+      }
+    }
+    
+    // Calcula o preço total com base na quantidade de sabores selecionados
+    for (var pizza in pizzas) {
+      if (options[pizza.sabor] == true) {
+        double precoSabor = calcularPrecoPizza(pizza);
+        precoTotal += precoSabor * (1 / saboresSelecionados);
+      }
+    }
+    
+    // Adiciona o preço das bebidas selecionadas
+    for (var bebida in bebidas) {
+      if (optionsBebida[bebida.nome] == true) {
+        precoTotal += bebida.preco;
+      }
+    }
+    
+    return precoTotal;
+  }
+
+  double calcularPrecoPizza(Pizza pizza) {
+    switch (selectedValue) {
+      case 'P':
+        return pizza.precos.p;
+      case 'M':
+        return pizza.precos.m;
+      case 'G':
+        return pizza.precos.g;
+      case 'GG':
+        return pizza.precos.gg;
+      default:
+        return 0.0; // Caso inesperado, retorna 0
+    }
+  }
+}
+
+class RadioOption extends StatelessWidget {
+  final String title;
+  final String value;
+  final String? groupValue;
+  final ValueChanged<String?> onChanged;
+
+  const RadioOption({
+    required this.title,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.scale(
+      scale: 0.9, 
+      child: RadioListTile<String>(
+        contentPadding: EdgeInsets.symmetric(horizontal: 0),
+        title: Text(title),
+        value: value,
+        groupValue: groupValue,
+        onChanged: onChanged,
+      ),
+    );
   }
 }

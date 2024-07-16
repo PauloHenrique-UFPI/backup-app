@@ -39,4 +39,14 @@ class ControllerPizzas extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<List<Pizza>> listarPizza() async {
+    try {
+      loading = true;
+      _pizzas = await _repository.buscarPizza('Qualquer coisa ai');
+    } finally {
+      loading = false;
+      return _pizzas;
+    }
+  }
 }

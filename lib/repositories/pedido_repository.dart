@@ -9,4 +9,9 @@ class PedidoRepository {
     final response = await _rest.get('/todos-pedidos');
     return response["groups"].map<Pedido>(Pedido.toMap).toList();
   }
+
+  Future<List<Pedido>> buscarID(String a, String id) async {
+    final response = await _rest.get('/usuario-pedido/$id');
+    return response["groups"].map<Pedido>(Pedido.toMap).toList();
+  }
 }

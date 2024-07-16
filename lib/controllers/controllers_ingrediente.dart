@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:veneza/models/borda.dart';
 import 'package:veneza/models/ingredientes.dart';
-import 'package:veneza/repositories/borda_repository.dart';
 import 'package:veneza/repositories/ingrediente_repository.dart';
 
 
@@ -58,6 +56,7 @@ class ControllerIngrediente extends ChangeNotifier {
       loading = true;
       resultado = await _repository.add(nome, preco);
     } finally {
+      // ignore: control_flow_in_finally
       return resultado;
     }
   }

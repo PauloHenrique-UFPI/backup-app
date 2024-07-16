@@ -27,7 +27,7 @@ class ControllerPedidos extends ChangeNotifier {
 
   List<Pedido> get pedido {
     return _pedidos
-        .where((e) => e.descricao.toLowerCase().contains(search.toLowerCase()))
+        .where((e) => e.status.toLowerCase().contains(search.toLowerCase()))
         .toList();
   }
 
@@ -35,6 +35,16 @@ class ControllerPedidos extends ChangeNotifier {
     try {
       loading = true;
       _pedidos = await _repository.buscar('Qualquer coisa ai');
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> buscarPorId(String id) async {
+    try {
+      loading = true;
+      _pedidos = await _repository.buscarID('Qualquer coisa ai', id);
     } finally {
       loading = false;
       notifyListeners();

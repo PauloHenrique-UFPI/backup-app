@@ -15,7 +15,11 @@ class _LoginPageState extends State<LoginPage> {
   final httpCliente = GetIt.I.get<RestClient>();
    String token = '';
    String rule = '';
-   int? id_cliente;
+   int id_cliente = 0;
+   String id_char = '';
+   String email_cliente = '';
+   String endereco_cliente = '';
+   String cep_cliente = '';
 
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
@@ -43,8 +47,17 @@ class _LoginPageState extends State<LoginPage> {
       
       token = response['token'];
       id_cliente = response['id'];
+      id_char = id_cliente.toString();
       rule = response['tipo'];
+      email_cliente = response['email'];
+      endereco_cliente = response['endereco'];
+      cep_cliente = response['cep'];
       await sharedPreferences.setString('token', token);
+      await sharedPreferences.setString('id_cliente', id_char);
+      await sharedPreferences.setString('tipo', rule);
+      await sharedPreferences.setString('email_cliente', email_cliente);
+      await sharedPreferences.setString('endereco_cliente', endereco_cliente);
+      await sharedPreferences.setString('cep_cliente', cep_cliente);
 
      if (rule == "user") {
         Navigator.pushNamed(context, '/homeCliente');

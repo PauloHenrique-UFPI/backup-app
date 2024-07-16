@@ -68,7 +68,7 @@ class DrawerCliente extends StatelessWidget {
               ),
             ),
             trailing: const Icon(Icons.arrow_forward), 
-            onTap: () {Navigator.pushNamed(context, '');},
+            onTap: () {Navigator.pushNamed(context, '/realizarPedido');},
           ),
           ListTile(
             title: Text(

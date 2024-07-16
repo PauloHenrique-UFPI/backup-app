@@ -1,5 +1,3 @@
-//este arquivo serve para componentizar os butões, isto é cria a regra de negocios para tratar de eventuais
-//botoes
 import 'package:flutter/material.dart';
 
 class BlockButton extends StatelessWidget {
