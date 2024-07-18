@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:veneza/blocs/validations_mixin.dart';
+import 'package:veneza/components/appBar_Atendente.dart';
 import 'package:veneza/components/appBar_Cliente.dart';
+import 'package:veneza/components/drawer_Atendente.dart';
 import 'package:veneza/components/drawer_Cliente.dart';
 import 'package:veneza/components/loading.dart';
 import 'package:veneza/components/texto_bf_campo.dart';
@@ -17,8 +19,8 @@ import 'package:veneza/models/rest_client.dart';
 import 'package:veneza/repositories/bebida_repository.dart';
 import 'package:veneza/repositories/pizza_repository.dart';
 
-class FazerPedidoPage extends StatefulWidget {
-  const FazerPedidoPage({super.key});
+class FazerPedidoAtendendePage extends StatefulWidget {
+  const FazerPedidoAtendendePage({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -26,7 +28,7 @@ class FazerPedidoPage extends StatefulWidget {
   }
 }
 
-class PedidoPageState extends State<FazerPedidoPage> with ValidationsMixin {
+class PedidoPageState extends State<FazerPedidoAtendendePage> with ValidationsMixin {
   final controllerPizza = ControllerPizzas(
     pizzaRepository: PizzaRepository(
       restClient: GetIt.I.get<RestClient>(),
@@ -162,7 +164,7 @@ class PedidoPageState extends State<FazerPedidoPage> with ValidationsMixin {
                   TextButton(
                     child: const Text('OK'),
                     onPressed: () {
-                      Navigator.pushNamed(context, '/meusPedidos');
+                      Navigator.pushNamed(context, '/initial');
                     },
                   ),
                 ],
@@ -200,38 +202,13 @@ class PedidoPageState extends State<FazerPedidoPage> with ValidationsMixin {
     double precoAtual = calcularPrecoAtual(); // Calcula o preço atual do pedido dinamicamente
 
     return Scaffold(
-      appBar: AppBarCliente(),
-      drawer: DrawerCliente(),
+      appBar: AppBarAtendente(),
+      drawer: DrawerAtendente(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(left: 12, right: 12, top: 10, bottom: 12),
           child: Column(
             children: [
-              const SizedBox(height: 10),
-              TituloTexto(label: "Informações do Cliente"),
-              const SizedBox(height: 10),
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      TextoBf(label: "E-mail: "),
-                      TextoCampo(label: emailCliente),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      TextoBf(label: "Endereço: "),
-                      TextoCampo(label: enderecoCliente),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      TextoBf(label: "CEP: "),
-                      TextoCampo(label: cepCliente),
-                    ],
-                  ),
-                ],
-              ),
               const SizedBox(height: 10),
               TituloTexto(label: "Forma de Pagamento"),
               const SizedBox(height: 10),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:veneza/core/rest_client/service_locator.dart';
 import 'package:veneza/models/pedidos.dart';
 import 'package:veneza/screens/atendente/adm/add_bebida.dart';
+import 'package:veneza/screens/atendente/adm/add_pedido.dart';
 import 'package:veneza/screens/atendente/adm/add_pizzza.dart';
+import 'package:veneza/screens/atendente/adm/adm/usuarios.dart';
 import 'package:veneza/screens/atendente/adm/bebida.dart';
 import 'package:veneza/screens/atendente/adm/borda.dart';
 import 'package:veneza/screens/atendente/adm/ingrediente.dart';
@@ -44,6 +46,7 @@ class MyApp extends StatelessWidget {
         "/bebida": (context) => const BebidaPage(),
         "/opcionais": (context) => const OpcionaisPage(),
         "/borda": (context) => const BordaPage(),
+        "/admin":(context) => const AdminPage(),
         "/ingrediente": (context) => const IngredientePage(),
         "/pedido": (context) => const PedidoPage(),
         "/meusPedidos": (context) => const MeusPedidosPage(),
@@ -51,6 +54,7 @@ class MyApp extends StatelessWidget {
         "/addPizza":(context) => const AddPizza(),
         "/addBebida":(context) => const AddBebida(),
         "/realizarPedido":(context) => const FazerPedidoPage(),
+        "/addPedido": (context) => const FazerPedidoAtendendePage(),
         "/pedidoEx": (context) {
           final arg = ModalRoute.of(context)?.settings.arguments;
           return PedidoExpandidoPage(

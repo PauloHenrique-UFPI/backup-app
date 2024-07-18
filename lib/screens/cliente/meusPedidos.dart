@@ -7,10 +7,10 @@ import 'package:veneza/models/pedidos.dart';
 import 'package:veneza/models/rest_client.dart';
 import 'package:get_it/get_it.dart';
 import 'package:veneza/repositories/pedido_repository.dart';
-
+import 'package:intl/intl.dart';
 
 class MeusPedidosPage extends StatefulWidget {
-  const MeusPedidosPage ({super.key});
+  const MeusPedidosPage({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -18,16 +18,14 @@ class MeusPedidosPage extends StatefulWidget {
   }
 }
 
-class MeusPedidosPageState extends State<MeusPedidosPage > {
+class MeusPedidosPageState extends State<MeusPedidosPage> {
   final controller = ControllerPedidos(
     pedidoRepository: PedidoRepository(
       restClient: GetIt.I.get<RestClient>(),
     ),
   );
 
-  String id='0';
-
-
+  String id = '0';
 
   @override
   void initState() {
@@ -45,7 +43,7 @@ class MeusPedidosPageState extends State<MeusPedidosPage > {
 
   @override
   Widget build(BuildContext context) {
-    return  AnimatedBuilder(
+    return AnimatedBuilder(
       animation: controller,
       builder: (_, __) {
         if (controller.loading) {
@@ -58,11 +56,9 @@ class MeusPedidosPageState extends State<MeusPedidosPage > {
             padding: const EdgeInsets.all(20),
             child: _Body(pedido: controller.pedido),
           ),
-          
         );
       },
     );
-
   }
 }
 
@@ -72,13 +68,19 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ordena os pedidos pelo campo dataHora em ordem decrescente
+    pedido.sort((a, b) => DateTime.parse(b.dataHora).compareTo(DateTime.parse(a.dataHora)));
+
     return ListView.builder(
       itemCount: pedido.length,
       itemBuilder: (context, index) {
+        // Converte a string de data e hora em DateTime e formata
+        DateTime dateTime = DateTime.parse(pedido[index].dataHora);
+        String formattedDate = DateFormat('dd-MM-yyyy HH:mm:ss').format(dateTime);
+
         return GestureDetector(
           onTap: () => {
-            Navigator.pushNamed(context, '/pedidoExCliente',
-                arguments: pedido[index]),
+            Navigator.pushNamed(context, '/pedidoExCliente', arguments: pedido[index]),
           },
           child: Card(
             elevation: 5.0,
@@ -103,7 +105,7 @@ class _Body extends StatelessWidget {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                           pedido[index].cliente.email,
+                          pedido[index].cliente.email,
                           textAlign: TextAlign.left,
                         ),
                         Text(
@@ -111,17 +113,22 @@ class _Body extends StatelessWidget {
                           textAlign: TextAlign.left,
                         ),
                         const SizedBox(height: 5),
+                        Text(
+                          formattedDate,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 5),
                         const Divider(color: Colors.black),
-                        const SizedBox(height: 5), 
+                        const SizedBox(height: 5),
                         Text(
                           'R\$ ${pedido[index].precoTotal.toStringAsFixed(2)}',
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 10), 
+                  SizedBox(width: 10),
                   const Padding(
-                    padding: EdgeInsets.only(top: 20.0), // Define um espaço de 10 pixels na parte superior
+                    padding: EdgeInsets.only(top: 20.0), // Define um espaço de 20 pixels na parte superior
                     child: Row(
                       children: <Widget>[
                         Text(
@@ -146,8 +153,6 @@ class _Body extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  
                 ],
               ),
             ),

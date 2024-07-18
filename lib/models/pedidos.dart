@@ -9,6 +9,7 @@ class Pedido {
   User cliente;
   List<Produto> produtos; 
   List<Bebida> bebidas;
+  String dataHora;
 
   
   Pedido({
@@ -20,11 +21,13 @@ class Pedido {
     required this.cliente,
     required this.produtos,
     required this.bebidas,
+    required this.dataHora,
   });
 
   factory Pedido.toMap(map) {
     return Pedido(
       id: map['id'] ?? 0,
+      dataHora: map['dataHora'] ?? "2000-00-00T00:00:00.000Z",
       status: map['status'] ?? 'não informado',
       precoTotal: map['precoTotal']?.toDouble() ?? 0.00,
       local: map['local'],
