@@ -67,10 +67,7 @@ class _Body extends StatelessWidget {
       itemCount: bebidas.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () => {
-            // Navigator.pushNamed(context, NoticiaCompletaViewRoute,
-            //     arguments: noticias[index]),
-          },
+          onTap: () => _showEditDialog(context, bebidas[index]),
           child: Card(
             elevation: 5.0,
             margin: const EdgeInsets.all(8.0),
@@ -133,3 +130,119 @@ class _Body extends StatelessWidget {
     );
   }
 }
+
+void _showEditDialog(BuildContext context, Bebida bebida) {
+    final TextEditingController nomeController = TextEditingController(text: bebida.nome);
+    final TextEditingController litrosController = TextEditingController(text: bebida.litros);
+    final TextEditingController precoController = TextEditingController(text: bebida.preco.toString());
+    final TextEditingController qtdController = TextEditingController(text: bebida.qtd.toString());
+    final controlador = ControllerBebidas(
+    bebidaRepository: BebidaRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: const Text(
+                'Editar Bebida',
+                textAlign: TextAlign.center,
+              ),
+                        content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image(
+                        image: NetworkImage(bebida.img),
+                        fit: BoxFit.cover,
+                        width: 150,
+                        height: 100,
+                      ),
+                    ),
+                SizedBox(height: 10), 
+                TextField(
+                  controller: nomeController,
+                  decoration: const InputDecoration(labelText: 'Nome: '),
+                ),
+                TextField(
+                  controller: litrosController,
+                  decoration: const InputDecoration(labelText: 'Volume: '),
+                ),
+                
+                const SizedBox(height: 10),
+                TextFormField(
+                  maxLines: null,
+                  controller: precoController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Preço: *",
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  maxLines: null,
+                  controller: qtdController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Quantidade: *",
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+               
+                      
+                const SizedBox(
+                  height: 5,
+                ),
+               
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Deletar'),
+                onPressed: () {
+                  try {
+                    controlador.deletarBebida(bebida.id);
+                    Navigator.pushNamed(context, '/initial'); 
+                  } catch (e) {
+                    print('Erro ao deletar pizza: $e');
+                  }
+                },
+              ),
+              TextButton(
+                child: const Text('Salvar'),
+                onPressed: () {
+                  bebida.nome = nomeController.text;
+                  bebida.litros = litrosController.text;
+                  bebida.preco = double.parse(precoController.text);
+                  bebida.qtd = int.parse(qtdController.text);
+
+                  try {
+                    controlador.updateBebida(bebida, bebida.id);
+                    Navigator.pushNamed(context, '/initial'); 
+                  } catch (e) {
+                    print('Erro ao atualizar pizza: $e');
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  

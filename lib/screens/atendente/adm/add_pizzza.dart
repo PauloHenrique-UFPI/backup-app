@@ -81,20 +81,6 @@ class _AddPizzaState extends State<AddPizza> with  ValidationsMixin{
       "img": await MultipartFile.fromFile(_image!.path, filename: "image.jpg"),
     });
 
-    // String formDataToString(FormData formData) {
-    //   final buffer = StringBuffer();
-    //   formData.fields.forEach((field) {
-    //     buffer.write('${field.key}: ${field.value}\n');
-    //   });
-    //   formData.files.forEach((file) {
-    //     buffer.write('${file.key}: ${file.value.filename}\n');
-    //   });
-    //   return buffer.toString();
-    // }
-
-    // // Imprime os dados do FormData
-    // print('FormData content:\n${formDataToString(formData)}');
-
     Response response = await Dio().post(
         'https://api-veneza.onrender.com/criar-pizza',
         data: formData,

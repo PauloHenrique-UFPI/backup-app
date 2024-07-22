@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:veneza/components/appBar_Atendente.dart';
 import 'package:veneza/components/drawer_Atendente.dart';
@@ -92,10 +94,7 @@ class _Body extends StatelessWidget {
       itemCount: pizzas.length,
       itemBuilder: (context, index) {
         return GestureDetector(
-          onTap: () => {
-            // Navigator.pushNamed(context, NoticiaCompletaViewRoute,
-            //     arguments: noticias[index]),
-          },
+          onTap: () => _showEditDialog(context, pizzas[index]),
           child: Card(
             elevation: 5.0,
             margin: const EdgeInsets.all(8.0),
@@ -155,3 +154,143 @@ class _Body extends StatelessWidget {
     );
   }
 }
+
+
+void _showEditDialog(BuildContext context, Pizza pizza) {
+    final TextEditingController saborController = TextEditingController(text: pizza.sabor);
+    final TextEditingController ingredientesController = TextEditingController(text: pizza.ingredientes);
+    final TextEditingController categoriaController = TextEditingController(text: pizza.categoria);
+    final TextEditingController pController = TextEditingController(text: pizza.precos.p.toString());
+    final TextEditingController mController = TextEditingController(text: pizza.precos.m.toString());
+    final TextEditingController gController = TextEditingController(text: pizza.precos.g.toString());
+    final TextEditingController ggController = TextEditingController(text: pizza.precos.gg.toString());
+    final controlador = ControllerPizzas(
+    pizzaRepository: PizzaRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: const Text(
+                'Editar Pizza',
+                textAlign: TextAlign.center,
+              ),
+                        content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image(
+                        image: NetworkImage(pizza.img),
+                        fit: BoxFit.cover,
+                        width: 150,
+                        height: 100,
+                      ),
+                    ),
+                SizedBox(height: 10), 
+                TextField(
+                  controller: saborController,
+                  decoration: const InputDecoration(labelText: 'Sabor'),
+                ),
+                TextField(
+                  controller: ingredientesController,
+                  decoration: const InputDecoration(labelText: 'Ingredientes'),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                SizedBox(
+                      width: 200, // Define a largura desejada
+                      child: TextFormField(
+                        maxLines: null,
+                        controller: pController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Preço P*",
+                        ),
+                      ),
+                    ),
+                      
+                const SizedBox(
+                  height: 5,
+                ),
+                SizedBox(
+                    width: 200, // Define a largura desejada
+                    child: TextFormField(
+                      maxLines: null,
+                      controller: mController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Preço M*",
+                      ),
+                    ),
+                  ),
+                const SizedBox(
+                  height: 5,
+                ),
+                SizedBox(
+                    width: 200, // Define a largura desejada
+                    child: TextFormField(
+                      maxLines: null,
+                      controller: gController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: "Preço G*",
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  SizedBox(
+                      width: 200, // Define a largura desejada
+                      child: TextFormField(
+                        maxLines: null,
+                        controller: ggController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Preço GG*",
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Salvar'),
+                onPressed: () {
+                  pizza.sabor = saborController.text;
+                  pizza.ingredientes = ingredientesController.text;
+                  pizza.precos.p = double.parse(pController.text);
+                  pizza.precos.m = double.parse(mController.text);
+                  pizza.precos.g = double.parse(gController.text);
+                  pizza.precos.gg = double.parse(ggController.text);
+
+                  try {
+                    controlador.updatePizza(pizza, pizza.id);
+                    Navigator.pushNamed(context, '/pizza'); 
+                  } catch (e) {
+                    print('Erro ao atualizar pizza: $e');
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }

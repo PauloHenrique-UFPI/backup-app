@@ -5,6 +5,7 @@ import 'package:veneza/repositories/bebida_repository.dart';
 class ControllerBebidas extends ChangeNotifier {
   final BebidaRepository _repository;
   String search = "";
+  bool resultado = false;
 
   var _bebidas = <Bebida>[];
   bool loading = false;
@@ -38,5 +39,23 @@ class ControllerBebidas extends ChangeNotifier {
       loading = false;
       notifyListeners();
     }
+  }
+
+  Future<bool> updateBebida(Bebida valor, int id) async {
+    try{
+      loading = true;
+      resultado = await _repository.update(valor, id);
+    } finally {
+      return resultado;
+    }
+  }
+
+  Future<bool> deletarBebida(int id) async {
+    try{
+       loading = true;
+    resultado = await _repository.remover(id);
+    } finally {
+      return resultado;
+   }
   }
 }

@@ -5,6 +5,7 @@ import 'package:veneza/repositories/pizza_repository.dart';
 class ControllerPizzas extends ChangeNotifier {
   final PizzaRepository _repository;
   String search = "";
+  bool resultado = false;
 
   var _pizzas = <Pizza>[];
   bool loading = false;
@@ -47,6 +48,15 @@ class ControllerPizzas extends ChangeNotifier {
     } finally {
       loading = false;
       return _pizzas;
+    }
+  }
+
+  Future<bool> updatePizza(Pizza valor, int id) async {
+    try{
+      loading = true;
+      resultado = await _repository.update(valor, id);
+    } finally {
+      return resultado;
     }
   }
 }

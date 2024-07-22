@@ -43,6 +43,22 @@ dependencies:
   intl: ^0.17.0
   image_picker: ^0.8.6
   image_cropper: ^4.0.1
+  flutter_native_splash: ^1.2.0
+  flutter_launcher_icons: ^0.9.1
+
+
+flutter_native_splash:
+ color: "#3F51B5"
+ image: "assets/app/logo.png"
+ android: true
+
+flutter_icons:
+  image_path: "assets/app/logo.png"
+  android: "launcher_icon"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/app/logo.png"
+
+
 
 dev_dependencies:
   flutter_test:

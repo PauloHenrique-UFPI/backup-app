@@ -54,27 +54,32 @@ class AdminDrawer extends StatelessWidget {
             color: Colors.orange,
           ),
           child: Center(
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: const TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Pizzaria',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.red,
-                      decoration: TextDecoration.underline, 
+            child: GestureDetector(
+                onTap: () {
+              Navigator.pushNamed(context, '/initial');
+              },
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Pizzaria',
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.red,
+                        decoration: TextDecoration.underline, 
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: 'Veneza',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.green,
-                      decoration: TextDecoration.underline, 
+                    TextSpan(
+                      text: 'Veneza',
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.green,
+                        decoration: TextDecoration.underline, 
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -186,27 +191,32 @@ class UserDrawer extends StatelessWidget {
               color: Colors.orange,
             ),
             child: Center(
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: const TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Pizzaria',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.red,
-                        decoration: TextDecoration.underline,
+              child: GestureDetector(
+                onTap: () {
+              Navigator.pushNamed(context, '/initial');
+              },
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: const TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Pizzaria',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.red,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: 'Veneza',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.green,
-                        decoration: TextDecoration.underline,
+                      TextSpan(
+                        text: 'Veneza',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.green,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
