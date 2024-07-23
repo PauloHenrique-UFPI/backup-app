@@ -156,7 +156,7 @@ class AdminDrawer extends StatelessWidget {
           IconButton(
             onPressed: () => {
               logout(),
-              Navigator.pushNamed(context, '/')
+              Navigator.pushNamedAndRemoveUntil(context, '/', (Route<dynamic> route) => false)
               },
             icon: const Center(
               child: Row(
@@ -285,7 +285,7 @@ class UserDrawer extends StatelessWidget {
           IconButton(
             onPressed: () async {
               await logout();
-              Navigator.pushNamed(context, '/');
+              Navigator.pushNamedAndRemoveUntil(context, '/', (Route<dynamic> route) => false);
             },
             icon: const Center(
               child: Row(

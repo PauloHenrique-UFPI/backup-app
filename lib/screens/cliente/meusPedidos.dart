@@ -105,7 +105,7 @@ class _Body extends StatelessWidget {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          pedido[index].cliente.email,
+                          pedido[index].endereco.endereco,
                           textAlign: TextAlign.left,
                         ),
                         Text(
@@ -127,14 +127,14 @@ class _Body extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 10),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 20.0), // Define um espaço de 20 pixels na parte superior
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
                     child: Row(
                       children: <Widget>[
                         Text(
                           "Status: ",
                           textAlign: TextAlign.left,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Color.fromARGB(255, 3, 3, 3),
@@ -146,7 +146,7 @@ class _Body extends StatelessWidget {
                             height: 50,
                             child: CircleAvatar(
                               radius: 125,
-                              backgroundColor: Colors.blue,
+                              backgroundColor: _getStatusColor(pedido[index].status),
                             ),
                           ),
                         ),
@@ -160,5 +160,18 @@ class _Body extends StatelessWidget {
         );
       },
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'cancelado':
+        return Colors.red;
+      case 'pendente':
+        return Colors.yellow;
+      case 'entregue':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
   }
 }

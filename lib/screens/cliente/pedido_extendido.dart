@@ -10,10 +10,12 @@ import 'package:veneza/components/drawer_Cliente.dart';
 import 'package:veneza/components/texto_bf_campo.dart';
 import 'package:veneza/components/texto_campo.dart';
 import 'package:veneza/components/titulo_borda.dart';
+import 'package:veneza/controllers/controllers_funcionario.dart';
 import 'package:veneza/controllers/controllers_pedido.dart';
 import 'package:veneza/models/pedidos.dart';
 import 'package:veneza/models/rest_client.dart';
 import 'package:get_it/get_it.dart';
+import 'package:veneza/repositories/funcionario_repository.dart';
 import 'package:veneza/repositories/pedido_repository.dart';
 
 
@@ -28,11 +30,18 @@ class PedidoExpandidoClientePage extends StatefulWidget {
 }
 
 class PedidoPageState extends State<PedidoExpandidoClientePage> {
+  final controller = ControllerFuncionario(
+    funcionarioRepository: FuncionarioRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
 
   @override
   void initState() {
     super.initState();
+    // controller.buscarFuncionarioId(widget.pedido.cliente.id);
   }
+  
   
 
   @override
@@ -65,13 +74,12 @@ class PedidoPageState extends State<PedidoExpandidoClientePage> {
                   Row(
                     children: [
                       TextoBf(label: 'E-mail: '),
-                      TextoCampo(label: widget.pedido.cliente.email)
+                      // TextoCampo(label: controller.fun!.email)
                     ],
                   ),
                   Row(
                     children: [
                       TextoBf(label: 'Endereço: '),
-                      TextoCampo(label: widget.pedido.cliente.endereco)
                     ],
                   ),
                 ],
@@ -202,6 +210,53 @@ class PedidoPageState extends State<PedidoExpandidoClientePage> {
 
               ),
             ),
+
+            const SizedBox(height: 30),
+
+            if(widget.pedido.status == 'pendente')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _showCancelConfirmationDialog(context, widget.pedido.id);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,            // Cor de fundo vermelha
+                        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),  // Aumenta o tamanho do botão
+                        textStyle: TextStyle(
+                          fontSize: 18,                 // Tamanho do texto
+                        ),
+                      ),
+                      child: Text(
+                        'Cancelar Pedido',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,  // Texto em negrito
+                          color: Colors.white,          // Cor do texto branca
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                     ElevatedButton(
+                      onPressed: () {
+                        _showImprimirConfirmationDialog(context, widget.pedido.id);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,            // Cor de fundo vermelha
+                        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),  // Aumenta o tamanho do botão
+                        textStyle: TextStyle(
+                          fontSize: 18,                 // Tamanho do texto
+                        ),
+                      ),
+                      child: Text(
+                        'Imprimir Pedido',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,  // Texto em negrito
+                          color: Colors.white,          // Cor do texto branca
+                        ),
+                      ),
+                    )
+                ],)
         ],
       ),
       ),
@@ -212,3 +267,141 @@ class PedidoPageState extends State<PedidoExpandidoClientePage> {
   );
   }
 }
+
+
+void _showCancelConfirmationDialog(BuildContext context, int id) {
+  final controller = ControllerPedidos(
+    pedidoRepository: PedidoRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('Você tem certeza que deseja cancelar o pedido?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Fecha o diálogo
+              },
+              child: Text('Não'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await controller.cancelarPedido(id);
+                  showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('UwU'),
+                      content: const Text('Pedido Cancelado !'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/homeCliente');
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                  
+                } catch (e) {
+                 showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Ops!'),
+                      content: const Text('Algo deu errado'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                } 
+              },
+              child: Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+void _showImprimirConfirmationDialog(BuildContext context, int id) {
+  final controller = ControllerPedidos(
+    pedidoRepository: PedidoRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('Você tem certeza que deseja Imprimir o pedido?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); 
+              },
+              child: Text('Não'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await controller.imprimirPedido(id);
+                  showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('UwU'),
+                      content: const Text('Pedido Cancelado !'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/homeCliente');
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                  
+                } catch (e) {
+                 showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Ops!'),
+                      content: const Text('Algo deu errado'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                } 
+              },
+              child: Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+  }

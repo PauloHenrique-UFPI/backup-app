@@ -23,9 +23,21 @@ class PizzaRepository {
       
     String? token = sharedPreferences.getString('token');
 
+    Map<String, dynamic> precos = {
+      'P': valor.precos.p,
+      'M': valor.precos.m,
+      'G': valor.precos.g,
+      'GG': valor.precos.gg,
+    };
+
+     // Convertendo o mapa de preços para JSON
+    String precosJson = jsonEncode(precos);
+    print('Preços JSON: $precosJson');
+
     FormData formData = FormData.fromMap({
       "sabor": valor.sabor,
       "ingredientes": valor.ingredientes,
+      "precos": precosJson,
       "categoria": valor.categoria
     });
     try {

@@ -9,6 +9,7 @@ class ControllerFuncionario extends ChangeNotifier {
   bool resultado = false;
 
   var _funcionarios = <Funcionario>[];
+  var fun = Funcionario;
   bool loading = false;
   bool searching = false;
 
@@ -41,6 +42,7 @@ class ControllerFuncionario extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   Future<bool> updateFuncionario(Funcionario valor, int id) async {
     try{

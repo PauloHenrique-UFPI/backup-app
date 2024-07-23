@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:veneza/components/appBar_Atendente.dart';
 import 'package:veneza/components/drawer_Atendente.dart';
 import 'package:veneza/controllers/controllers_pedido.dart';
@@ -60,13 +61,19 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ordena os pedidos pelo campo dataHora em ordem decrescente
+    pedido.sort((a, b) => DateTime.parse(b.dataHora).compareTo(DateTime.parse(a.dataHora)));
+
     return ListView.builder(
       itemCount: pedido.length,
       itemBuilder: (context, index) {
+        // Converte a string de data e hora em DateTime e formata
+        DateTime dateTime = DateTime.parse(pedido[index].dataHora);
+        String formattedDate = DateFormat('dd-MM-yyyy HH:mm:ss').format(dateTime);
+
         return GestureDetector(
           onTap: () => {
-            Navigator.pushNamed(context, '/pedidoEx',
-                arguments: pedido[index]),
+            Navigator.pushNamed(context, '/pedidoEx', arguments: pedido[index]),
           },
           child: Card(
             elevation: 5.0,
@@ -91,7 +98,7 @@ class _Body extends StatelessWidget {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                           pedido[index].cliente.email,
+                          pedido[index].endereco.endereco,
                           textAlign: TextAlign.left,
                         ),
                         Text(
@@ -99,23 +106,28 @@ class _Body extends StatelessWidget {
                           textAlign: TextAlign.left,
                         ),
                         const SizedBox(height: 5),
+                        Text(
+                          formattedDate,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 5),
                         const Divider(color: Colors.black),
-                        const SizedBox(height: 5), 
+                        const SizedBox(height: 5),
                         Text(
                           'R\$ ${pedido[index].precoTotal.toStringAsFixed(2)}',
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 10), 
-                  const Padding(
-                    padding: EdgeInsets.only(top: 20.0), // Define um espaço de 10 pixels na parte superior
+                  SizedBox(width: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
                     child: Row(
                       children: <Widget>[
                         Text(
                           "Status: ",
                           textAlign: TextAlign.left,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Color.fromARGB(255, 3, 3, 3),
@@ -127,15 +139,13 @@ class _Body extends StatelessWidget {
                             height: 50,
                             child: CircleAvatar(
                               radius: 125,
-                              backgroundColor: Colors.blue,
+                              backgroundColor: _getStatusColor(pedido[index].status),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  
                 ],
               ),
             ),
@@ -143,5 +153,18 @@ class _Body extends StatelessWidget {
         );
       },
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'cancelado':
+        return Colors.red;
+      case 'pendente':
+        return Colors.yellow;
+      case 'entregue':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
   }
 }

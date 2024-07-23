@@ -4,6 +4,8 @@ class Pedido {
   int id;
   String status;
   double precoTotal;
+  String formaPagamento;
+  Endereco endereco;
   String local;
   String descricao;
   User cliente;
@@ -16,6 +18,8 @@ class Pedido {
     required this.id,
     required this.status,
     required this.precoTotal,
+    required this.formaPagamento,
+    required this.endereco,
     required this.local,
     required this.descricao,
     required this.cliente,
@@ -30,6 +34,8 @@ class Pedido {
       dataHora: map['dataHora'] ?? "2000-00-00T00:00:00.000Z",
       status: map['status'] ?? 'não informado',
       precoTotal: map['precoTotal']?.toDouble() ?? 0.00,
+      endereco: Endereco.toMap(map['endereco']),
+      formaPagamento: map['FormaPagamento'] ?? 'não informado',
       local: map['local'],
       descricao: map['descricao'],
       cliente: User.toMap(map['usuario']),
@@ -134,3 +140,25 @@ class Bebida {
   }
 }
 
+class Endereco {
+  int id;
+  String cep;
+  String endereco;
+  String referencia;
+
+  Endereco({
+    required this.id,
+    required this.cep,
+    required this.endereco,
+    required this.referencia
+  });
+
+  factory Endereco.toMap(map) {
+    return Endereco(
+      id: map['id'] ?? 0,
+      cep: map['cep'] ?? "Não Informado",
+      endereco: map['endereco'] ?? "Não Informado",
+      referencia: map['referencia'] ?? "Não Informado",
+    );
+  }
+}

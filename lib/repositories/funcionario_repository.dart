@@ -16,6 +16,11 @@ class FuncionarioRepository {
     return response["groups"].map<Funcionario>(Funcionario.toMap).toList();
   }
 
+  Future<Funcionario> buscarID(int id) async {
+    final response = await _rest.get('/user/$id');
+    return Funcionario.toMap(response);
+  }
+
   Future<bool> update(Funcionario valor, int id) async {
     final httpCliente = GetIt.I.get<RestClient>();
     SharedPreferences sharedPreferences =

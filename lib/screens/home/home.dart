@@ -84,8 +84,8 @@ class _Body extends StatelessWidget {
                   children: <Widget>[
                     const Center(
                       child: SizedBox(
-                        width: 80,
-                        height: 80,
+                        width: 90,
+                        height: 90,
                         child: CircleAvatar(
                           radius: 125, 
                           backgroundImage: AssetImage("assets/images/logo.png"),
@@ -117,7 +117,7 @@ class _Body extends StatelessWidget {
                       ),
                     ),
                   ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
                     
                     const Text(
                       '📍 R. São Sebastião, 799 - Canto de Várzea, Picos-PI',

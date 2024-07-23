@@ -85,7 +85,7 @@ class DrawerCliente extends StatelessWidget {
           IconButton(
             onPressed: () => {
               logout(),
-              Navigator.pushNamed(context, '/')
+              Navigator.pushNamedAndRemoveUntil(context, '/', (Route<dynamic> route) => false)
               },
             icon: const Center(
               child: Row(

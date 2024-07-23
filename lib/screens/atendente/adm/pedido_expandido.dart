@@ -32,7 +32,6 @@ class PedidoPageState extends State<PedidoExpandidoPage> {
     super.initState();
   }
   
-
   @override
   Widget build(BuildContext context) {
     double horizontalPadding = MediaQuery.of(context).size.width * 0.04;
@@ -69,7 +68,7 @@ class PedidoPageState extends State<PedidoExpandidoPage> {
                   Row(
                     children: [
                       TextoBf(label: 'Endereço: '),
-                      TextoCampo(label: widget.pedido.cliente.endereco)
+                      TextoCampo(label: widget.pedido.endereco.endereco)
                     ],
                   ),
                 ],
@@ -200,6 +199,110 @@ class PedidoPageState extends State<PedidoExpandidoPage> {
 
               ),
             ),
+
+            const SizedBox(height: 30),
+            if(widget.pedido.status == 'pendente')
+            Column(
+              children: [
+                Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          _showCancelConfirmationDialog(context, widget.pedido.id);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,            // Cor de fundo vermelha
+                          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),  // Aumenta o tamanho do botão
+                          textStyle: TextStyle(
+                            fontSize: 18,                 // Tamanho do texto
+                          ),
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,  // Texto em negrito
+                            color: Colors.white,          // Cor do texto branca
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                       ElevatedButton(
+                        onPressed: () {
+                          _showAceitarConfirmationDialog(context, widget.pedido.id);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,            // Cor de fundo vermelha
+                          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),  // Aumenta o tamanho do botão
+                          textStyle: TextStyle(
+                            fontSize: 18,                 // Tamanho do texto
+                          ),
+                        ),
+                        child: Text(
+                          'Aceitar',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,  // Texto em negrito
+                            color: Colors.white,          // Cor do texto branca
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                       ElevatedButton(
+                        onPressed: () {
+                          _showEntregaConfirmationDialog(context, widget.pedido.id);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.yellow,            // Cor de fundo vermelha
+                          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),  // Aumenta o tamanho do botão
+                          textStyle: TextStyle(
+                            fontSize: 18,                 // Tamanho do texto
+                          ),
+                        ),
+                        child: Text(
+                          'Entrega',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,  // Texto em negrito
+                            color: Colors.white,          // Cor do texto branca
+                          ),
+                        ),
+                      ),
+                      
+                  ],),
+                  
+              ] 
+            )
+          else if(widget.pedido.status == 'aceito')
+            Column(
+                children: [
+                  Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _showEntregaConfirmationDialog(context, widget.pedido.id);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.yellow,            // Cor de fundo vermelha
+                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),  // Aumenta o tamanho do botão
+                            textStyle: TextStyle(
+                              fontSize: 18,                 // Tamanho do texto
+                            ),
+                          ),
+                          child: Text(
+                            'Entrega',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,  // Texto em negrito
+                              color: Colors.white,          // Cor do texto branca
+                            ),
+                          ),
+                        ),
+                        
+                    ],),
+                    
+                ] 
+              )
+
+            
         ],
       ),
       ),
@@ -210,3 +313,209 @@ class PedidoPageState extends State<PedidoExpandidoPage> {
   );
   }
 }
+
+void _showCancelConfirmationDialog(BuildContext context, int id) {
+  final controller = ControllerPedidos(
+    pedidoRepository: PedidoRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('Você tem certeza que deseja cancelar o pedido?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Fecha o diálogo
+              },
+              child: Text('Não'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await controller.cancelarPedido(id);
+                  showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('UwU'),
+                      content: const Text('Pedido Cancelado !'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/initial');
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                  
+                } catch (e) {
+                 showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Ops!'),
+                      content: const Text('Algo deu errado'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                } 
+              },
+              child: Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+void _showAceitarConfirmationDialog(BuildContext context, int id) {
+  final controller = ControllerPedidos(
+    pedidoRepository: PedidoRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('Você tem certeza que deseja aceitar o pedido?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Fecha o diálogo
+              },
+              child: Text('Não'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await controller.aceitarPedido(id);
+                  showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('UwU'),
+                      content: const Text('Pedido Aceito !'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/initial');
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                  
+                } catch (e) {
+                 showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Ops!'),
+                      content: const Text('Algo deu errado'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                } 
+              },
+              child: Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+void _showEntregaConfirmationDialog(BuildContext context, int id) {
+  final controller = ControllerPedidos(
+    pedidoRepository: PedidoRepository(
+      restClient: GetIt.I.get<RestClient>(),
+    ),
+  );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text('Deseja mandar o pedido para entrega?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Fecha o diálogo
+              },
+              child: Text('Não'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await controller.entregaPedido(id);
+                  showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('UwU'),
+                      content: const Text('Pedido foi para Entrega !'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/initial');
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                  
+                } catch (e) {
+                 showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Ops!'),
+                      content: const Text('Algo deu errado'),
+                      actions: [
+                        TextButton(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+                } 
+              },
+              child: Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+  }

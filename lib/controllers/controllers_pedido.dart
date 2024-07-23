@@ -10,6 +10,7 @@ class ControllerPedidos extends ChangeNotifier {
   var _pedidos = <Pedido>[];
   bool loading = false;
   bool searching = false;
+  bool resultado = false;
 
   void changeSearch(String key) {
     search = key;
@@ -48,6 +49,42 @@ class ControllerPedidos extends ChangeNotifier {
     } finally {
       loading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> cancelarPedido(int id) async {
+    try{
+      loading = true;
+      resultado = await _repository.cancelar(id);
+    } finally {
+      return resultado;
+    }
+  }
+
+  Future<bool> aceitarPedido(int id) async {
+    try{
+      loading = true;
+      resultado = await _repository.aceitar(id);
+    } finally {
+      return resultado;
+    }
+  }
+
+  Future<bool> entregaPedido(int id) async {
+    try{
+      loading = true;
+      resultado = await _repository.entrega(id);
+    } finally {
+      return resultado;
+    }
+  }
+
+  Future<bool> imprimirPedido(int id) async {
+    try{
+      loading = true;
+      resultado = await _repository.downloadAndSavePDF("https://api-veneza.onrender.com/imprimir-pedido/$id","pedido.pdf");
+    } finally {
+      return resultado;
     }
   }
 }
